@@ -1,0 +1,76 @@
+<!--
+Idea is to use maven standard build cycle, while still being able
+to prepare and do post tasks with well known ant mechanisms here
+
+Its conveniant to doubleclick the project in the Ant Task view
+and everything runs including deploy to test server.
+-->
+
+<project name="HeywikiMinecraftMod" default="copy-deploy" basedir=".">
+
+	<property environment="env"/>
+	
+    <target name="debug" depends="">
+        <echo message="Lists the properties for debugging purposes ..."/>
+
+    	<echo message="ant.project.name   = ${ant.project.name}"/>
+        <echo message="basedir     = ${basedir}"/>
+        <echo message="user.home   = ${user.home}"/>
+    	
+    	<echo message="$MAVEN_HOME = ${env.MAVEN_HOME}"/>
+    	<echo message="$MINECRAFT_SERVER = ${env.MINECRAFT_SERVER}"/>
+    	
+   </target>
+
+	<!--
+	Use command line to execute maven task from ant: ant has to run on command line
+	https://www.theserverside.com/tutorial/How-to-install-Maven-and-build-apps-with-the-mvn-command-line
+	-->
+    <condition property="mvn" value="${env.MAVEN_HOME}/bin/mvn.cmd" >
+        <os family="windows" />
+    </condition>
+	<condition property="mvn" value="mvn" else="mvn" >
+		<os family="mac" />
+	</condition>
+	
+    <target name="mvn_install" depends="">
+    	<exec executable="${mvn}" failonerror="true">
+    	    <arg line="clean install"/>
+    	</exec>
+    </target>
+
+	<!--
+	Deploys jar build by maven to directory...
+	-->
+    <target name="copy-deploy" depends="mvn_install">
+
+        <delete dir="${env.MINECRAFT_SERVER}/plugins"/>
+        <mkdir dir="${env.MINECRAFT_SERVER}/plugins"/>
+        <copy todir="${env.MINECRAFT_SERVER}/plugins" >
+            <fileset dir="target">
+                <include name="${ant.project.name}*.jar"/>
+            </fileset>
+        </copy>
+
+    	<echo message="Copied jars to ${env.MINECRAFT_SERVER}/plugins"/>
+    	
+    </target>
+	
+	<!--
+	Final delivery to be deployed with docker container on
+	heywiki paper mc
+	-->
+    <target name="copy-HeywikiPaperServer" depends="copy-deploy">
+
+        <copy todir="../HeywikiPaperServer/lib/mods" >
+            <fileset dir="target">
+                <include name="${ant.project.name}*.jar"/>
+            </fileset>
+        </copy>
+
+    	<echo message="Copied jars to ${env.MINECRAFT_SERVER}/plugins"/>
+    	
+    </target>
+
+	
+</project>

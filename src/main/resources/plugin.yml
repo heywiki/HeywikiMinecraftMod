@@ -1,0 +1,16 @@
+name: HeywikiMinecraftMod
+version: ${project.version}
+main: org.wikiwizard.papermc.ChatInterface
+authors: [Heywiki]
+description: Test project for minecraft PaperMC
+website: https://github.com/heywiki/HeywikiMinecraftMod
+commands:
+    hey-version:
+        description: Shows the version
+        usage: /<commands>
+    hey-die:
+        description: Player dies
+        usage: /<commands>
+    hey-healthplease:
+        description: Addes health of player +1
+        usage: /<commands>

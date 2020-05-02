@@ -1,5 +1,6 @@
 name: HeywikiMinecraftMod
-version: ${project.version}
+version: 0.1
+api-version: 1.13
 main: org.wikiwizard.papermc.ChatInterface
 authors: [Heywiki]
 description: Test project for minecraft PaperMC

@@ -62,13 +62,13 @@ and everything runs including deploy to test server.
 	-->
     <target name="copy-HeywikiPaperServer" depends="copy-deploy">
 
-        <copy todir="../HeywikiPaperServer/lib/mods" >
+        <copy todir="../HeywikiPaperServer/init/plugins" >
             <fileset dir="target">
                 <include name="${ant.project.name}*.jar"/>
             </fileset>
         </copy>
 
-    	<echo message="Copied jars to ${env.MINECRAFT_SERVER}/plugins"/>
+    	<echo message="Copied jars to ${env.MINECRAFT_SERVER}/init/plugins"/>
     	
     </target>
 

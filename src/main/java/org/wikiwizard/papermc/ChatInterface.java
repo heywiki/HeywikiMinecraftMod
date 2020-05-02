@@ -7,17 +7,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class ChatInterface extends JavaPlugin {
 
-	public static final String VERSION = "0.1";
-	
-	@Override
-	public void onDisable() {
-		this.getLogger().info("HeywikiMinecraftMod Version " + VERSION);
-	}
+	public static final String VERSION = "0.2";
 
 	@Override
 	public void onEnable() {
-		// TODO Auto-generated method stub
-		super.onEnable();
+		this.getLogger().info("HeywikiMinecraftMod Version " + VERSION);
+		this.getConfig().options().copyDefaults();
+		this.saveDefaultConfig();
 	}
 
 	@Override
@@ -26,15 +22,21 @@ public class ChatInterface extends JavaPlugin {
 		if (!(sender instanceof Player)) return false;
 		Player player = (Player) sender;
 		
-		if (command.getName().contentEquals("hey-version")) {
+		if (command.getName().contentEquals("version")) {
 			player.sendMessage("Version " + VERSION);
 		}
-		else if (command.getName().contentEquals("hey-die")) {
+		else if (command.getName().contentEquals("die")) {
 			player.setHealth(0);
 		}
-		else if (command.getName().contentEquals("hey-healthplease")) {
+		else if (command.getName().contentEquals("healthplease")) {
 			player.setHealth(player.getHealth() + 1);
-		}		
+		}
+		else if (command.getName().contentEquals("mqtt")) {
+			//todo...
+		}	
+		else if (command.getName().contentEquals("mqttconfig")) {
+			player.sendMessage("mqtt-server : " + getConfig().getString("mqtt-server"));
+		}
 		return true;
 	}
 }

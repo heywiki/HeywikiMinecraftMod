@@ -62,6 +62,12 @@ and everything runs including deploy to test server.
 	-->
     <target name="copy-HeywikiPaperServer" depends="copy-deploy">
 
+    	<!-- delete old ones (catch old versions to!) -->
+    	<delete>
+    	  <fileset dir="../HeywikiPaperServer/setup/plugins" 
+    	  	includes="${ant.project.name}*.jar"/>
+    	</delete>
+    	
         <copy todir="../HeywikiPaperServer/setup/plugins" >
             <fileset dir="target">
                 <include name="${ant.project.name}*.jar"/>

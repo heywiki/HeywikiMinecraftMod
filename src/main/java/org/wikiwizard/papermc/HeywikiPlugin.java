@@ -3,11 +3,14 @@ package org.wikiwizard.papermc;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class HeywikiPlugin extends JavaPlugin {
 
-	MqttManager mqtt;
+	MqttManager mqttManager;
+	WorkCounter workCounter;
+	EventTracer eventTracer;
 	
 	@Override
 	public void onEnable() {
@@ -18,14 +21,27 @@ public class HeywikiPlugin extends JavaPlugin {
 		getConfig().options().copyDefaults();
 		saveDefaultConfig();
 		
-		mqtt = new MqttManager();
-		getCommand(MqttManager.CMD_MQTTCONF).setExecutor(mqtt);
-		getCommand(MqttManager.CMD_MQTTPUB).setExecutor(mqtt);
+		mqttManager = new MqttManager();
+		getCommand(MqttManager.CMD_MQTTCONF).setExecutor(mqttManager);
+		getCommand(MqttManager.CMD_MQTTPUB).setExecutor(mqttManager);
+
+		PluginManager pluginManager = getServer().getPluginManager();
+		
+		//for debbuging purposes
+		eventTracer = new EventTracer();
+		pluginManager.registerEvents(eventTracer, this);
+
+		workCounter = new WorkCounter();
+		pluginManager.registerEvents(workCounter, this);
 	}
 
 	@Override
 	public void onDisable() {
-		mqtt.onDisable();
+		mqttManager.onDisable();
+	}
+	
+	public MqttManager getMqttManager()  {
+		return mqttManager;
 	}
 	
 	@Override

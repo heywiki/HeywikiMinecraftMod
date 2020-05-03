@@ -1,11 +1,12 @@
 package org.wikiwizard.papermc;
 
+import java.util.logging.Logger;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -41,18 +42,25 @@ public class MqttManager implements CommandExecutor, MqttCallback {
 	/** displays the mqtt config in plugin.yml */
 	public static String CMD_MQTTCONF = "mqttconf";
 	
-	Plugin plugin;
+	HeywikiPlugin plugin;
+	Logger log;
 	
 	MemoryPersistence persistence;
 	MqttClient client;
-
+	String defaultTopic;
 	
 	public MqttManager() {
+		
 		plugin = HeywikiPlugin.getPlugin(HeywikiPlugin.class);
+		log = plugin.getLogger();
 		
 	    persistence = new MemoryPersistence();
 		
 	    FileConfiguration config = plugin.getConfig();
+	    
+		defaultTopic = config.getString(CONF_MQTT_DEFAULT_TOPIC);
+	    if (defaultTopic == null) defaultTopic = MQTT_DEFAULT_TOPIC;
+		
         try {
 			client = new MqttClient(
 					config.getString(CONF_MQTT_SERVER), 
@@ -69,12 +77,12 @@ public class MqttManager implements CommandExecutor, MqttCallback {
 	            		config.getString(CONF_MQTT_PASSWORD).toCharArray());
 	        }
 	        
-	        plugin.getLogger().info("Connecting mqtt client...");
+	        log.info("Connecting mqtt client...");
 	        client.connect(conOpts);
-	        plugin.getLogger().info("Connecting successful");
+	        log.info("Connecting successful");
 	        
         } catch (MqttException e) {
-        	plugin.getLogger().severe("Unable to connect mqtt client at "
+        	log.severe("Unable to connect mqtt client at "
         			+ config.getString("mqtt-server") + ":" + e);
         }
 	}
@@ -84,7 +92,7 @@ public class MqttManager implements CommandExecutor, MqttCallback {
 		try {
 			client.disconnect();
 		} catch (Exception e) {
-        	plugin.getLogger().severe("Unable to disconnect mqtt client at "
+        	log.severe("Unable to disconnect mqtt client at "
         			+ plugin.getConfig().getString("mqtt-server") + ":" + e);
 		}
 	}
@@ -104,7 +112,7 @@ public class MqttManager implements CommandExecutor, MqttCallback {
 				return false;
 			}
 
-			String topic = MQTT_DEFAULT_TOPIC;
+			String topic = getDefaultTopic();
 			StringBuilder message = new StringBuilder();
 			for (String s : args) {
 				if (s.startsWith("topic:")) {
@@ -116,16 +124,11 @@ public class MqttManager implements CommandExecutor, MqttCallback {
 			}
 			
 			player.sendMessage("publish " + topic + ":" + message);
-			
-            MqttMessage mqttMsg = new MqttMessage(message.toString().getBytes());
-            mqttMsg.setQos(DEFAULT_QOS);
-            
-            try {
-                client.publish(topic, mqttMsg);
-                player.sendMessage("SUCCESS: published to topic " + topic);
-			} catch (Exception e) {
-				player.sendMessage("ERR: unable to publish, exception is " + e);
+			if (!publish(topic, message.toString())) {
+				//admin must check logs
+				player.sendMessage("There is something wrong, message could not be send.");				
 			}
+			
 			return true;
 		}	
 		else if (command.getName().contentEquals(CMD_MQTTCONF)) {
@@ -150,6 +153,46 @@ public class MqttManager implements CommandExecutor, MqttCallback {
 		return false;
 	}
 
+	/**
+	 * Gets the default topic from puglin.yml or
+	 * if not set from this class
+	 * 
+	 * @return
+	 */
+	public String getDefaultTopic() {
+		return defaultTopic;
+	}
+	
+	/**
+	 * Publishes a mqtt message
+	 * 
+	 * @param topic
+	 * @param message
+	 * @return
+	 */
+	public boolean publish(String topic, String message) {
+		
+        MqttMessage mqttMsg = new MqttMessage(message.toString().getBytes());
+        mqttMsg.setQos(DEFAULT_QOS);
+        
+        try {
+            client.publish(topic, mqttMsg);
+            log.info("SUCCESS: published to topic " + topic);
+            return true;
+		} catch (Exception e) {
+			log.severe("ERR: unable to publish, exception is " + e);
+			return false;
+		}
+
+	}
+	
+	/**
+	 * Publishes message with default topic
+	 */
+	public boolean publish(String message) {
+		return publish(getDefaultTopic(), message);
+	}
+	
 	@Override
 	public void connectionLost(Throwable cause) {
 

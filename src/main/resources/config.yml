@@ -1,3 +1,9 @@
 #Let you send messages over mqtt
 
+#url to an mqtt server 
+#e.g. tcp://test.mosquitto.org:1883
+#     -> this one is public and needs no username/password
 mqtt-server: 'tcp://test.mosquitto.org:1883'
+#mqtt-username: myuser
+#mqtt-password: supersecret
+mqtt-default-topic: 'heywiki/mqtt'

@@ -1,23 +1,26 @@
 name: heywiki
-version: 0.2
+version: 0.3
 api-version: 1.13
-main: org.wikiwizard.papermc.ChatInterface
+main: org.wikiwizard.papermc.HeywikiPlugin
 authors: [Heywiki]
 description: Test project for minecraft PaperMC
 website: https://github.com/heywiki/HeywikiMinecraftMod
 commands:
     version:
         description: Shows the version
-        usage: /<commands>
+        usage: /version
+    traceargs:
+        description: Debug trace args
+        usage: /traceargs arg1 arg2 ...
     die:
         description: Player dies
-        usage: /<commands>
+        usage: /die
     healthplease:
         description: Addes health of player +1
-        usage: /<commands>
-    mqtt:
+        usage: /healthplease
+    mqttpub:
         description: will send mqtt message to server configured in config.yml
-        usage: /<commands>
-    mqttconfig:
-        description: will display mqtt config
-        usage: /<commands>
+        usage: /mqttpub hello world! OR /mqttpub topic:heywiki/mytopic hello world!
+    mqttconf:
+        description: displays the mqtt config in plugin.yml
+        usage: /mqttconf
